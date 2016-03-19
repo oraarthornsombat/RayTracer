@@ -53,6 +53,7 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
 Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
 	RayIntersectionInfo iInfo;
 	double intersection =this->group->intersect(ray,iInfo,-1);
+	//first sample image
 	if (intersection>=0){
 		return Point3D(1,1,1);
 	}
