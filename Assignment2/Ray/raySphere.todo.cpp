@@ -13,10 +13,10 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	
 	bool intersects = false;
  	//|P - O|^2 - r^2 = 0 
-	double rsquare = pow(radius,2);
+	double rsquare = pow(this->radius,2);
 
 	//L = O - P0
-	Point3D l = center - ray.position;
+	Point3D l = this->center - ray.position;
 	
 	//tca = L • V
 	double tca = l.dot(ray.direction);
@@ -38,11 +38,13 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 
 		double t = -1;
 		//return first intersection point
-		if (t1 > t2)
+		if (t1 > t2 && t2>=0)
+		//check that t2 is not negative
 		{
 			t = t2;
 		}
-		else
+		else if (t2>t1 && t1>=0)
+		//check that t1 is not negative
 		{
 			t = t1;
 		}
@@ -50,15 +52,15 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	//Ray: P = P0 + tV
 	Point3D p = ray.position + ray.direction*t;
 	//||P-O||
-	double magnitude = sqrt(pow(p.p[0] - center.p[0],2) + pow(p.p[1] - center.p[1],2) + pow(p.p[2] - center.p[2],2));
+	double magnitude = sqrt(pow(p.p[0] - this->center.p[0],2) + pow(p.p[1] - this->center.p[1],2) + pow(p.p[2] - this->center.p[2],2));
 
 	//N = (P - O) / ||P - O||
-	Point3D normal = (p - center) / magnitude;
+	Point3D normal = (p - this->center) / magnitude;
 	
-	if ((intersects && mx<0)){
+//	if ((intersects && mx<0)){
 		iInfo.iCoordinate = p;
 		iInfo.normal = normal;
-	}
+//	}
 	
 	return t;
 	}

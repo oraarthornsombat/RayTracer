@@ -35,6 +35,7 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
 	top = p0 + (towards*d) + (up*d*tan(heightAngle));
 	//p1 in slides
 	bottom = p0 + (towards*d) - (up*d*tan(heightAngle));
+	//extra stuff to make it 3D
 	left = p0 + (towards*d) - (r*d*tan(widthAngle));
 	right = p0 + (towards*d) + (r*d*tan(widthAngle));
 
@@ -50,8 +51,12 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
 }
 
 Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
-	return Point3D();
-	
+	RayIntersectionInfo iInfo;
+	double intersection =this->group->intersect(ray,iInfo,-1);
+	if (intersection>=0){
+		return Point3D(1,1,1);
+	}
+	return Point3D(0,0,0);
 }
 
 //////////////////
