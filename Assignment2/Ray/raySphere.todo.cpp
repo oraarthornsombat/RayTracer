@@ -57,10 +57,11 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	//N = (P - O) / ||P - O||
 	Point3D normal = (p - this->center) / magnitude;
 	
-//	if ((intersects && mx<0)){
+	if (mx<0){
 		iInfo.iCoordinate = p;
 		iInfo.normal = normal;
-//	}
+		iInfo.material = this->material;
+	}
 	
 	return t;
 	}

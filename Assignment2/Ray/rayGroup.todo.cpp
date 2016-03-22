@@ -2,6 +2,7 @@
 #include <cfloat>
 #include <GL/glut.h>
 #include "rayGroup.h"
+#include "math.h"
 
 ////////////////////////
 //  Ray-tracing stuff //
@@ -18,14 +19,27 @@ double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	for (int i=0; i<this->sNum; i++){
 		RayShape** shapes = this->shapes;
 		Point3D minPt = ray.position;
+		RayIntersectionInfo tempInfo = RayIntersectionInfo();
 	
 	//	double minDist = DBL_MAX;
-		if (shapes[i]->intersect(ray,iInfo, mx)>=0){
-			double tempDist = (iInfo.iCoordinate - ray.position).length();
+	
+		if (shapes[i]->intersect(ray,tempInfo, mx)>=0){
+	
+		//	double tempDist = (tempInfo.iCoordinate - ray.position).length();
+	
+		double tempDist = sqrt(pow(tempInfo.iCoordinate[0] - ray.position[0],2) + pow(tempInfo.iCoordinate[1] - ray.position[1],2) + pow(tempInfo.iCoordinate[2] - ray.position[2],2));
+			
 			if (tempDist<minDist){
 					minDist = tempDist;
 					minI = i;
+					iInfo.material = tempInfo.material;
+					iInfo.iCoordinate = tempInfo.iCoordinate;
+					iInfo.normal = tempInfo.normal;
+					break;
+			
+				
 			}
+		
 			
 			//nothing
 		}

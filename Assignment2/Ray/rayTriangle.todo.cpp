@@ -7,6 +7,7 @@
 //  Ray-tracing stuff //
 ////////////////////////
 void RayTriangle::initialize(void){
+	
 }
 double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	
@@ -39,6 +40,7 @@ double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	} else {
 		iInfo.iCoordinate = p;
 		iInfo.normal = normal;
+		iInfo.material = this->material;
 		return t;
 	}
 	
