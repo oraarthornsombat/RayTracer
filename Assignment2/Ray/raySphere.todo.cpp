@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include "rayScene.h"
 #include "raySphere.h"
+#include <iostream>
 
 ////////////////////////
 //  Ray-tracing stuff //
@@ -11,7 +12,6 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	//at a distance less than t along the ray the intersection information in iInfo is set 
 	//and a value greater than 0 is returned. Otherwise, -1 is returned. 
 	
-	bool intersects = false;
  	//|P - O|^2 - r^2 = 0 
 	double rsquare = pow(this->radius,2);
 
@@ -26,19 +26,21 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 
 	//Instersection with sphere? No.
 	if (dsquare > rsquare){
-		intersects=false;
 		return -1;
 	} else {
 		//Else, intersects
-		intersects=true;
 		//thc = sqrt(r^2 - d^2)
 		double thc = sqrt(rsquare - dsquare);
 		double t1 = tca - thc;
 		double t2 = tca + thc;
 
 		double t = -1;
+		
+		if (t1>=0 && t2>=0){
+			t = (t1<t2)? t1: t2;
+		}
 		//return first intersection point
-		if (t1 > t2 && t2>=0)
+		else if (t1 > t2 && t2>=0)
 		//check that t2 is not negative
 		{
 			t = t2;
@@ -56,13 +58,14 @@ double RaySphere::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 
 	//N = (P - O) / ||P - O||
 	Point3D normal = (p - this->center) / magnitude;
-	
-	if (mx<0){
+
+	if (mx<0 || mx > (ray.position-p).length()){
 		iInfo.iCoordinate = p;
 		iInfo.normal = normal;
 		iInfo.material = this->material;
+		mx = (ray.position-p).length();
 	}
-	
+//	std::cout<<"t: "<<t<<" ";
 	return t;
 	}
 }
