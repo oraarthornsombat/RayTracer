@@ -1,6 +1,7 @@
 #include "rayScene.h"
 #include <GL/glut.h>
 #include <math.h>
+#include <iostream>
 
 
 ///////////////////////
@@ -54,32 +55,53 @@ Ray3D RayScene::GetRay(RayCamera* camera,int i,int j,int width,int height){
 Point3D RayScene::GetColor(Ray3D ray,int rDepth,Point3D cLimit){
 	RayIntersectionInfo* iInfo = new RayIntersectionInfo();
 	double intersection =this->group->intersect(ray,*iInfo,-1);
+	Point3D diffuse = Point3D(0,0,0);
+	Point3D specular= Point3D(0,0,0);
 	Point3D i = Point3D(0,0,0);
+	int isInShadow =0;
+	
 	if (intersection>=0){
 	//	Point3D ambient = iInfo->material->ambient;
 	//	Point3D emissive = iInfo->material->emissive;
 	i += iInfo->material->emissive + iInfo->material->ambient * this->ambient;
 	
-	//point+=iInfo.material->specular;
-	//Point3D emissive = iInfo.material->emissive;
-	//Reflected light direction	R = -L + 2(N ⋅ L)N
-	//	Point3D r= ray.direction*-1 + iInfo->normal*2*(iInfo->normal.dot(ray.direction));
-	//i=ie + ks(v dot r)^n*il
 		for (int l = 0; l < lightNum; l++){
-//		i += emissive + ambient*Ial);
 			
-			i += this->lights[l]->getDiffuse(camera->position, *iInfo);
-			i += this->lights[l]->getSpecular(camera->position, *iInfo);
-		}
+			//diffuse stuff
+			diffuse += this->lights[l]->getDiffuse(camera->position, *iInfo);
+			
+			//specular stuff
+			specular += this->lights[l]->getSpecular(camera->position, *iInfo);
+		
+			//shadow stuff
+			int isectCount = 0;
+			for(int s = 0; s < this->group->sNum; s++) {
+			
+				isInShadow += this->lights[l]->isInShadow(*iInfo, this->group->shapes[s], isectCount);
+				
+			}
+
+			Point3D shadow = Point3D(1,1,1);
+			
+			if (isectCount>0){
+				shadow = Point3D(0,0,0);
+			}
+			
+			
+			i = i + (diffuse + specular) *shadow;
+			 i[0] = (i[0]<0)? 0: i[0];
+			 i[0] = (i[0]>1)? 1: i[0];
+			 i[1] = (i[1]<0)? 0: i[1];
+			 i[1] = (i[1]>1)? 1: i[1];
+			 i[2] = (i[2]<0)? 0: i[2];
+			 i[2] = (i[2]>1)? 1: i[2];
+			
+		} //end for lights
+			
 	} else {
 		i= this->background;
 	}
-	
-/*	//first sample image
-	if (intersection>=0){
-		return Point3D(1,1,1);
-	}
-	return Point3D(0,0,0);*/
+
 	return i;
 }
 
