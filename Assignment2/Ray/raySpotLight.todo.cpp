@@ -41,10 +41,10 @@ Point3D RaySpotLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& iI
 	Point3D unitNormalDir = iInfo.normal.unit();
 	Point3D unitLightDir = (this->location-iInfo.iCoordinate).unit();
 	//R = -L + 2(N dot L) N
-	Point3D unitReflectedDir = (unitLightDir - (unitNormalDir).scale(2* (unitLightDir.dot(unitNormalDir)))).unit();
+	Point3D unitReflectedDir = (unitLightDir*-1 + (unitNormalDir).scale(2* (unitLightDir.dot(unitNormalDir)))).unit();
 	double dotProd = unitCamDir.dot(unitReflectedDir);
 	
-	//Point3D materialSpecular = iInfo.material->specular;
+//	Point3D materialSpecular = iInfo.material->specular;
 	Point3D materialSpecular = (dotProd<0) ? Point3D(0,0,0) :  iInfo.material->specular;
 	
 	double distance = (this->location-iInfo.iCoordinate).length();
@@ -56,7 +56,7 @@ Point3D RaySpotLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& iI
 //	if((L.dot(direction.unit()) / (L.length() * direction.length())) > cos(cutOffAngle) ){
 	if (((this->direction.unit()).dot(L)) < cos(this->cutOffAngle)){
 		double attenuation = (this->constAtten + (this->linearAtten*distance) + (this->quadAtten*pow(distance,2.0)));
-		light = ((this->color * abs(pow(L.dot(direction.unit()),dropOffRate))) / attenuation);
+		light = ((this->color * pow(L.dot(direction.unit()),dropOffRate)) / attenuation);
 	}
 		
 	double r = materialSpecular[0] * light[0] * (pow(dotProd, n));
@@ -64,10 +64,23 @@ Point3D RaySpotLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& iI
 	double b = materialSpecular[2] * light[2] * (pow(dotProd, n));
 
 
-	return Point3D(r,g,b).scale(pow(dotProd,n));
+	return Point3D(r,g,b);
 }
 int RaySpotLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& isectCount){
+	
+	Point3D temp = this->location - iInfo.iCoordinate;
+	double dist = temp.length();
+
+	Ray3D newRay = Ray3D();
+	newRay.position = iInfo.iCoordinate;
+	newRay.direction = temp.unit();
+
+	if(shape->intersect(newRay, iInfo, dist) > 0){
+		isectCount+=1;
+		return 1;
+	}
 	return 0;
+	
 }
 Point3D RaySpotLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
 	return Point3D(1,1,1);
