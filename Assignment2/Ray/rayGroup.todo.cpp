@@ -8,51 +8,46 @@
 //  Ray-tracing stuff //
 ////////////////////////
 double RayGroup::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
+	
 	//Cast rays through scene-graph nodes. 
 	//compute the intersection properties for the closest intersection within the list of RayShapes associated to the RayGroup.
 	//(The number of shapes associated to the group is stored in RayShape::sNum and the list of shapes is stored in RayShape::shapes.)
 	//This method should return return -1.0 if there is no intersection. 
 	//Otherwise, it should return the (positive) distance to the intersection. 
 	//If the value mx is bigger than zero, then only look for intersections whose distance is closer than mx from the beginning of the ray.
-	int minI=-1;
+/*	int minI=-1;
 	double minDist = DBL_MAX;
+
 	for (int i=0; i<this->sNum; i++){
 		RayShape** shapes = this->shapes;
 		Point3D minPt = ray.position;
-		RayIntersectionInfo tempInfo = RayIntersectionInfo();
-	
-	//	double minDist = DBL_MAX;
-	
-		if (shapes[i]->intersect(ray,tempInfo, mx)>=0){
-	
-		//	double tempDist = (tempInfo.iCoordinate - ray.position).length();
-	
-		double tempDist = sqrt(pow(tempInfo.iCoordinate[0] - ray.position[0],2) + pow(tempInfo.iCoordinate[1] - ray.position[1],2) + pow(tempInfo.iCoordinate[2] - ray.position[2],2));
-			
-			if (tempDist<minDist){
-					minDist = tempDist;
-					minI = i;
-					iInfo.material = tempInfo.material;
-					iInfo.iCoordinate = tempInfo.iCoordinate;
-					iInfo.normal = tempInfo.normal;
-					break;
-			
-				
-			}
-		
-			
-			//nothing
-		}
+		if (shapes[i]->intersect(ray, iInfo, mx)>=0){
+			mx = (ray.position - iInfo.iCoordinate).length();
+
 	}
-	if (minI>-1){
-//		shapes[minI]->intersect(ray,iInfo, mx);
-		return minDist;
-	} else {
-		return -1;
 	}
+	return mx; */
+	
+//Transform the ray (M^-1)
+//Compute the intersection
+//Transform the intersection (M)
+	int minI=-1;
+	double minDist = DBL_MAX;
+	Ray3D transformedRay;
+	Matrix4D matrix = this->getMatrix().invert();
 	
 	
-	//return -1;
+
+	for (int i=0; i<this->sNum; i++){
+		RayShape** shapes = this->shapes;
+		Point3D minPt = ray.position;
+		if (shapes[i]->intersect(ray, iInfo, mx)>=0){
+			mx = (ray.position - iInfo.iCoordinate).length();
+
+	}
+	}
+	return mx;
+
 }
 
 BoundingBox3D RayGroup::setBoundingBox(void){
