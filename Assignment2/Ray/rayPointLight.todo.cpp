@@ -37,7 +37,7 @@ Point3D RayPointLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& i
 	
 	Point3D unitCamDir = (iInfo.iCoordinate-cameraPosition).unit();
 	//R = -L + 2(N dot L) N
-	Point3D unitReflectedDir = (unitLightDir - (unitNormalDir).scale(2* (unitLightDir.dot(unitNormalDir)))).unit();
+	Point3D unitReflectedDir = (unitLightDir*-1 + (unitNormalDir).scale(2* (unitLightDir.dot(unitNormalDir)))).unit();
 	double dotProd = unitCamDir.dot(unitReflectedDir);
 //	Point3D materialSpecular = iInfo.material->specular;
 	Point3D materialSpecular = (dotProd<0) ? Point3D(0,0,0) :  iInfo.material->specular;
@@ -46,14 +46,26 @@ Point3D RayPointLight::getSpecular(Point3D cameraPosition,RayIntersectionInfo& i
 	double greenLight = this->color[1];
 	double blueLight = this->color[2];
 
-	double r = materialSpecular[0] * (redLight / attenuation) * (pow(dotProd,n));
-	double g = materialSpecular[1] * (greenLight / attenuation) * (pow(dotProd,n));
-	double b = materialSpecular[2] * (blueLight / attenuation) * (pow(dotProd,n));
+	double r =  materialSpecular[0] * (redLight / attenuation) * (pow(dotProd,n));
+	double g =  materialSpecular[1] * (greenLight / attenuation) * (pow(dotProd,n));
+	double b =  materialSpecular[2] * (blueLight / attenuation) * (pow(dotProd,n));
 	
-	return Point3D(r,g,b).scale(pow(dotProd,n));
+	return Point3D(r,g,b);
 }
 int RayPointLight::isInShadow(RayIntersectionInfo& iInfo,RayShape* shape,int& isectCount){
+	Point3D temp = this->location - iInfo.iCoordinate;
+	double dist = temp.length();
+
+	Ray3D newRay = Ray3D();
+	newRay.position = iInfo.iCoordinate;
+	newRay.direction = temp.unit();
+
+	if(shape->intersect(newRay, iInfo, dist) > 0){
+		isectCount+=1;
+		return 1;
+	}
 	return 0;
+
 }
 Point3D RayPointLight::transparency(RayIntersectionInfo& iInfo,RayShape* shape,Point3D cLimit){
 	return Point3D(1,1,1);
