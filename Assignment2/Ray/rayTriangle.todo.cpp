@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "rayTriangle.h"
-
+#include <iostream>
 ////////////////////////
 //  Ray-tracing stuff //
 ////////////////////////
@@ -16,15 +16,14 @@ double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	Point3D t2 = this->v[2]->position;
 	Point3D	line0 = t0-t1;
 	Point3D line1 = t2-t1;
-	Point3D normal = line0.crossProduct(line1);
+	Point3D normal = line0.crossProduct(line1).unit();
 	//N • (ray.position - a point on the plane)
-	double d = normal.dot(ray.position- t0);
+	double d = normal.dot(t0);
 	//t = -(P0 • N + d) / (V • N)
 	double t = -1*(ray.position.dot(normal)+d) / (ray.direction.dot(normal));
 	
 	// P = P0 + tV
 	Point3D p = ray.position + ray.direction*t;
-	
 	
 	Point3D v1 = t0 - ray.position;
 	Point3D v2 = t1 - ray.position;
@@ -38,10 +37,15 @@ double RayTriangle::intersect(Ray3D ray,RayIntersectionInfo& iInfo,double mx){
 	if ((p - ray.position).dot(triangleNormal) < 0 || (p - ray.position).dot(triangleNormal1) < 0 || (p - ray.position).dot(triangleNormal2) < 0){
  		return -1;
 	} else {
-		iInfo.iCoordinate = p;
-		iInfo.normal = normal;
-		iInfo.material = this->material;
-		return t;
+		if (mx<0 || mx > (p-ray.position).length()){
+			mx = (ray.position-p).length();
+			iInfo.iCoordinate = p;
+			iInfo.normal = normal;
+			iInfo.material = this->material;
+			return t;
+		} else {
+			return -1;
+		}
 	}
 	
 
